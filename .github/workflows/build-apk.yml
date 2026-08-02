@@ -15,7 +15,7 @@ jobs:
       - name: Unzip project
         run: unzip -o PhotoSearchApp.zip
 
-        - name: Fix missing launcher icon reference
+      - name: Fix missing launcher icon reference
         run: sed -i '/android:icon="@mipmap\/ic_launcher"/d' PhotoSearchApp/app/src/main/AndroidManifest.xml
 
       - name: Set up JDK 17
