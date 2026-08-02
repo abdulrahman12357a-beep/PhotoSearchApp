@@ -18,6 +18,9 @@ jobs:
       - name: Fix missing launcher icon reference
         run: sed -i '/android:icon="@mipmap\/ic_launcher"/d' PhotoSearchApp/app/src/main/AndroidManifest.xml
 
+      - name: Fix missing dp import
+        run: sed -i '/import androidx.compose.ui.text.style.TextAlign/a import androidx.compose.ui.unit.dp' PhotoSearchApp/app/src/main/java/com/example/photosearch/MainActivity.kt
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
