@@ -1,1 +1,50 @@
+name: Build APK
 
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Unzip project
+        run: unzip -o PhotoSearchApp.zip
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.4'
+
+      - name: Download local AI model (MobileNet quantized + labels)
+        working-directory: PhotoSearchApp
+        run: |
+          mkdir -p app/src/main/assets
+          curl -L -o /tmp/model.zip \
+            https://storage.googleapis.com/download.tensorflow.org/models/tflite/mobilenet_v1_1.0_224_quant_and_labels.zip
+          unzip -o /tmp/model.zip -d /tmp/model_extracted
+          find /tmp/model_extracted -name "*.tflite" -exec cp {} app/src/main/assets/model.tflite \;
+          find /tmp/model_extracted -iname "labels*.txt" -exec cp {} app/src/main/assets/labels.txt \;
+
+      - name: Build debug APK
+        working-directory: PhotoSearchApp
+        run: gradle assembleDebug --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: PhotoSearchApp-debug-apk
+          path: PhotoSearchApp/app/build/outputs/apk/debug/app-debug.apk
